@@ -1,4 +1,10 @@
-import { View, Text, StyleSheet, Alert, FlatList } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  Alert,
+  FlatList,
+  useWindowDimensions,
+} from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { Title } from '../components/ui/Title';
 import { NumberContainer } from '../components/game/NumberContainer';
@@ -25,6 +31,8 @@ export const GamePlayScreen = ({ userNumber, gameOverHandler }) => {
   const [currentGuess, setCurrentGuess] = useState(initalGuess);
   const [guessRounds, setGuessRounds] = useState([initalGuess]);
 
+  const { width, height } = useWindowDimensions();
+
   useEffect(() => {
     if (currentGuess === userNumber) {
       gameOverHandler(guessRounds.length);
@@ -36,6 +44,7 @@ export const GamePlayScreen = ({ userNumber, gameOverHandler }) => {
     max = 100;
   }, []);
 
+  const listItemLength = guessRounds.length;
   //if gussed num is greater than value. gussedNum 22 > value 10 then should click -
   // when we click - we make max as value. max is exclusive.
   //if gussed num is smaller than value then should click +
@@ -65,48 +74,107 @@ export const GamePlayScreen = ({ userNumber, gameOverHandler }) => {
     setCurrentGuess(newRandomNumber);
     setGuessRounds((prev) => [newRandomNumber, ...prev]);
   };
+  let potraitScreen =
+    width < 480 ? (
+      <>
+        <Title>Opponent's Guess</Title>
 
-  const listItemLength = guessRounds.length;
-
-  return (
-    <View style={styles.screen}>
-      <Title>Opponent's Guess</Title>
-
-      <NumberContainer>{currentGuess}</NumberContainer>
-      <Card>
-        <InstructionText style={styles.InstructionText}>
-          Higher or Lower
-        </InstructionText>
-        <View style={styles.buttonsContainer}>
-          <View style={styles.buttonContainer}>
-            <PrimaryButton onPressHandler={() => nextGuessHandler('greater')}>
-              <Ionicons name="md-add" size={24} color="white" />
-            </PrimaryButton>
+        <NumberContainer>{currentGuess}</NumberContainer>
+        <Card>
+          <InstructionText style={styles.InstructionText}>
+            Higher or Lower
+          </InstructionText>
+          <View style={styles.buttonsContainer}>
+            <View style={styles.buttonContainer}>
+              <PrimaryButton onPressHandler={() => nextGuessHandler('greater')}>
+                <Ionicons name="md-add" size={24} color="white" />
+              </PrimaryButton>
+            </View>
+            <View style={styles.buttonContainer}>
+              <PrimaryButton onPressHandler={() => nextGuessHandler('lower')}>
+                <Ionicons name="md-remove" size={24} color="white" />
+              </PrimaryButton>
+            </View>
           </View>
-          <View style={styles.buttonContainer}>
-            <PrimaryButton onPressHandler={() => nextGuessHandler('lower')}>
-              <Ionicons name="md-remove" size={24} color="white" />
-            </PrimaryButton>
+        </Card>
+        <View style={styles.listContainer}>
+          <InstructionText style={styles.text}>
+            Computer's Guess
+          </InstructionText>
+          <FlatList
+            data={guessRounds}
+            keyExtractor={(item) => item}
+            renderItem={(itemData) => {
+              return (
+                <GussedLog
+                  roundNum={listItemLength - itemData.index}
+                  gussedNum={itemData.item}
+                />
+              );
+            }}
+          />
+        </View>
+      </>
+    ) : (
+      <>
+        <View
+          style={{
+            flex: 1,
+            flexDirection: 'row',
+            alignItems: 'center',
+            // justifyContent: 'center',
+          }}
+        >
+          <View style={{ alignItems: 'center' }}>
+            <Title>Opponent's Guess</Title>
+            <NumberContainer>{currentGuess}</NumberContainer>
+            <View style={{ alignItems: 'center' }}>
+              <View style={styles.buttonsContainer}>
+                <View style={styles.buttonContainer}>
+                  <PrimaryButton
+                    onPressHandler={() => nextGuessHandler('greater')}
+                  >
+                    <Ionicons name="md-add" size={24} color="white" />
+                  </PrimaryButton>
+                </View>
+              </View>
+              <View style={{ alignItems: 'center', paddingVertical: 4 }}>
+                <InstructionText>Higher or Lower</InstructionText>
+              </View>
+              <View style={styles.buttonsContainer}>
+                <View style={styles.buttonContainer}>
+                  <PrimaryButton
+                    onPressHandler={() => nextGuessHandler('lower')}
+                  >
+                    <Ionicons name="md-remove" size={24} color="white" />
+                  </PrimaryButton>
+                </View>
+              </View>
+            </View>
+          </View>
+
+          <View style={[styles.listContainer, { marginLeft: 48 }]}>
+            <InstructionText style={styles.text}>
+              Computer's Guess
+            </InstructionText>
+
+            <FlatList
+              data={guessRounds}
+              keyExtractor={(item) => item}
+              renderItem={(itemData) => {
+                return (
+                  <GussedLog
+                    roundNum={listItemLength - itemData.index}
+                    gussedNum={itemData.item}
+                  />
+                );
+              }}
+            />
           </View>
         </View>
-      </Card>
-      <View style={styles.listContainer}>
-        <InstructionText style={styles.text}>Computer's Guess</InstructionText>
-        <FlatList
-          data={guessRounds}
-          keyExtractor={(item) => item}
-          renderItem={(itemData) => {
-            return (
-              <GussedLog
-                roundNum={listItemLength - itemData.index}
-                gussedNum={itemData.item}
-              />
-            );
-          }}
-        />
-      </View>
-    </View>
-  );
+      </>
+    );
+  return <View style={styles.screen}>{potraitScreen}</View>;
 };
 
 const styles = StyleSheet.create({
@@ -131,7 +199,7 @@ const styles = StyleSheet.create({
   },
   listContainer: {
     flex: 1,
-    borderWidth: 1,
-    borderColor: 'white',
+    // borderWidth: 1,
+    // borderColor: 'white',
   },
 });

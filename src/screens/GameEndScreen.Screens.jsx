@@ -1,4 +1,12 @@
-import { StyleSheet, Text, View, Image, Dimensions } from 'react-native';
+import {
+  StyleSheet,
+  Text,
+  View,
+  Image,
+  Dimensions,
+  useWindowDimensions,
+  ScrollView,
+} from 'react-native';
 import React from 'react';
 import { Title } from '../components/ui/Title';
 import { Colors } from '../constants/colors';
@@ -8,28 +16,49 @@ const deviceWidth = Dimensions.get('window').width;
 const deviceHeight = Dimensions.get('window').height;
 
 export const GameEndScreen = ({ onStartNewGame, numOfRounds, userNumber }) => {
+  const { width, height } = useWindowDimensions();
+  let imageSize = 300;
+  if (width < 380) {
+    imageSize = 150;
+  }
+  if (height < 480) {
+    imageSize = 80;
+  }
+
+  const imageStyle = {
+    width: imageSize,
+    height: imageSize,
+    borderRadius: imageSize / 2,
+  };
+
   return (
-    <View style={styles.rootContainer}>
-      <Title>Game Over!</Title>
-      <View style={styles.imageContainer}>
-        <Image
-          style={styles.image}
-          source={require('../../assets/images/success.png')}
-        />
+    <ScrollView style={styles.screen}>
+      <View style={styles.rootContainer}>
+        <Title>Game Over!</Title>
+        <View style={[styles.imageContainer, imageStyle]}>
+          <Image
+            style={[styles.image]}
+            source={require('../../assets/images/success.png')}
+          />
+        </View>
+        <Text style={styles.summaryText}>
+          Your Phone needed <Text style={styles.highlight}>{numOfRounds}</Text>{' '}
+          rounds to guess the number
+          <Text style={styles.highlight}> {userNumber}</Text>
+        </Text>
+        <PrimaryButton onPressHandler={onStartNewGame}>
+          Start a new Game
+        </PrimaryButton>
       </View>
-      <Text style={styles.summaryText}>
-        Your Phone needed <Text style={styles.highlight}>{numOfRounds}</Text>{' '}
-        rounds to guess the number
-        <Text style={styles.highlight}> {userNumber}</Text>
-      </Text>
-      <PrimaryButton onPressHandler={onStartNewGame}>
-        Start a new Game
-      </PrimaryButton>
-    </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+    paddingTop: 50,
+  },
   rootContainer: {
     flex: 1,
     justifyContent: 'center',
